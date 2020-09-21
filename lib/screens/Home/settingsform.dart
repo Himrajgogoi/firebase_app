@@ -79,7 +79,8 @@ class _SettingsFormState extends State<SettingsForm> {
                           await DatabaseService(uid: user.id).updateData(
                               _currentName?? data.name
                               , _currentEmail?? data.email
-                              , _currentPhone?? data.phone);
+                              , _currentPhone?? data.phone,
+                          null);
                         }
                         Navigator.pop(context);
 

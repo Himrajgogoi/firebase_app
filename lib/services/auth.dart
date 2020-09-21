@@ -25,7 +25,7 @@ class AuthService {
       UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       User user = result.user;
 
-      await DatabaseService(uid: user.uid).updateData(name, email, phone);
+      await DatabaseService(uid: user.uid).createData(name, email, phone, null);
       return _userFromFirebaseUser(user);
     }
     catch(e){
@@ -50,7 +50,7 @@ class AuthService {
         return _userFromFirebaseUser(user);
       }
       else if(exists == "no"){
-        await DatabaseService(uid: user.uid).updateData("new member", email, "N/A");
+        await DatabaseService(uid: user.uid).createData("new member", email, "N/A", "not yet provided");
         return _userFromFirebaseUser(user);
       }
 

@@ -8,5 +8,7 @@ class userData {
   final String name;
   final String email;
   final String phone;
-  userData({this.id, this.name, this.email, this.phone});
+  final String profilepic;
+  List<dynamic> feeds=[];
+  userData({this.id, this.name, this.email, this.phone, this.profilepic, this.feeds});
 }

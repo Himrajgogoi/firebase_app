@@ -1,8 +1,12 @@
-
+import "dart:math";
 import 'dart:io';
 import 'package:firebase_app/model/display.dart';
+import 'package:firebase_app/model/user.dart';
+import 'package:firebase_app/screens/Home/Feed.dart';
+import 'package:firebase_app/screens/selectprofilepic.dart';
 import 'package:firebase_app/services/auth.dart';
 import 'package:firebase_app/services/database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
 import 'package:provider/provider.dart';
 import "package:firebase_app/screens/Home/userlist.dart";
@@ -17,30 +21,31 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  final AuthService _auth = AuthService();
+   final AuthService _auth = AuthService();
 
+  String screen = "home";
 
   void update(){
     showModalBottomSheet(context: context, builder: (context){
       return Container(
-        color: Colors.green,
-        child: SettingsForm()
+          color: Colors.green,
+          child: Profile()
       );
     });
   }
 
-  File sampleImage;
-
-  Future getImage() async {
-     var tempImage = await ImagePicker().getImage(source: ImageSource.gallery);
-
-     setState(() {
-       sampleImage = File(tempImage.path);
+   void account(){
+     showModalBottomSheet(context: context, builder: (context){
+       return Container(
+           color: Colors.green,
+           child: Container()
+       );
      });
-  }
+   }
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<User_>(context);
     return StreamProvider<List<userInfo>>.value(
       value: DatabaseService().info,
       child: Scaffold(
@@ -71,37 +76,53 @@ class _HomeState extends State<Home> {
 
               ],
             ),
-        body: Center(
-          child: sampleImage == null? Text("first choose an image"): enableUpload(),
-        ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.blue,
-          child: Icon(
-              Icons.add
+        body: screen == "home"?UserList(): Feed(),
+        bottomSheet: BottomAppBar(
+          color: Colors.purple,
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 5.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                InkWell(
+                  onTap: (){
+                    setState(() {
+                      screen = "home";
+                    });
+                  },
+                  child: Icon(
+                    Icons.home,
+                    color: Colors.white,
+                    size: 30.0,
+                  ),
+                ),
+                InkWell(
+                  onTap: (){
+                    setState(() {
+                      screen = "feed";
+                    });
+                  },
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size:30.0
+                  ),
+                ),
+                InkWell(
+                  onTap: (){
+                    account();
+                  },
+                  child: Icon(
+                    Icons.account_circle,
+                    color: Colors.white,
+                    size: 30.0
+                  ),
+                ),
+              ],
+            ),
           ),
-          onPressed: (){
-            getImage();
-          },
         ),
-          ),
-    );
-  }
-
-  Widget enableUpload() {
-    return Container(
-      padding: EdgeInsets.only(top: 20.0),
-      child: Column(
-        children: <Widget>[
-          Image.file(sampleImage, height:300.0, width: 300.0),
-          RaisedButton(
-            child: Text("upload"),
-            onPressed: ()  {
-              final StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child("myimage.jpg");
-              final StorageUploadTask task = firebaseStorageRef.putFile(sampleImage);
-            },
-          )
-        ],
-      ),
+      )
     );
   }
 

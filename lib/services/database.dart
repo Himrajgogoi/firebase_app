@@ -16,11 +16,27 @@ class DatabaseService {
       .collection("userInfo");
 
   //creating data
-  Future updateData(String name, String email, String phone) async {
+  Future createData(String name, String email, String phone, String pic) async {
     return await userCollection.doc(uid).set({
       "name": name,
       "email": email,
-      "phone": phone
+      "phone": phone,
+      "profilepic": pic,
+      "feeds": []
+    });
+  }
+  Future updateData(String name, String email, String phone, String pic) async {
+    return await userCollection.doc(uid).update({
+      "name": name,
+      "email": email,
+      "phone": phone,
+      "profilepic": pic,
+    });
+  }
+
+  Future updateFeed(String pic) async {
+    return await userCollection.doc(uid).update({
+      "feeds": FieldValue.arrayUnion([pic]),
     });
   }
 
@@ -36,7 +52,9 @@ class DatabaseService {
       return userInfo(
           name: doc.data()["name"] ?? "new member",
           email: doc.data()["email"] ?? "not given",
-          phone: doc.data()["phone"] ?? "not provided"
+          phone: doc.data()["phone"] ?? "not provided",
+        profilepic:  doc.data()["profilepic"]?? "not provided",
+        feeds: doc.data()["feeds"]?? []
       );
     }).toList();
   }
@@ -51,7 +69,9 @@ class DatabaseService {
       id: uid,
       name: snapshot.data()["name"],
       email: snapshot.data()["email"],
-      phone: snapshot.data()["phone"]
+      phone: snapshot.data()["phone"],
+      profilepic: snapshot.data()["profilepic"],
+        feeds: snapshot.data()["feeds"] ?? []
     );
   }
 
