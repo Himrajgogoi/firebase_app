@@ -10,6 +10,7 @@ class DatabaseService {
 
   final String uid;
   DatabaseService({this.uid});
+  String error;
 
   //creating a collection
   final CollectionReference userCollection = FirebaseFirestore.instance
@@ -35,8 +36,15 @@ class DatabaseService {
   }
 
   Future updateFeed(String pic) async {
+        return await userCollection.doc(uid).update({
+          "feeds": FieldValue.arrayUnion([pic]),
+        });
+
+
+  }
+  Future deleteFeed(String pic) async {
     return await userCollection.doc(uid).update({
-      "feeds": FieldValue.arrayUnion([pic]),
+      "feeds": FieldValue.arrayRemove([pic]),
     });
   }
 

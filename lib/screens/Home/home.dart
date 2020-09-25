@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_app/model/display.dart';
 import 'package:firebase_app/model/user.dart';
 import 'package:firebase_app/screens/Home/Feed.dart';
+import 'package:firebase_app/screens/Home/account.dart';
 import 'package:firebase_app/screens/selectprofilepic.dart';
 import 'package:firebase_app/services/auth.dart';
 import 'package:firebase_app/services/database.dart';
@@ -38,7 +39,7 @@ class _HomeState extends State<Home> {
      showModalBottomSheet(context: context, builder: (context){
        return Container(
            color: Colors.green,
-           child: Container()
+           child: Account()
        );
      });
    }
@@ -49,9 +50,9 @@ class _HomeState extends State<Home> {
     return StreamProvider<List<userInfo>>.value(
       value: DatabaseService().info,
       child: Scaffold(
-            backgroundColor: Colors.purple[50],
+            backgroundColor: Colors.blue[50],
             appBar: AppBar(
-              backgroundColor: Colors.purple[500],
+              backgroundColor: Colors.blue[900],
               title: Text("Home",
               style: TextStyle(
                 color: Colors.white
@@ -78,7 +79,7 @@ class _HomeState extends State<Home> {
             ),
         body: screen == "home"?UserList(): Feed(),
         bottomSheet: BottomAppBar(
-          color: Colors.purple,
+          color: Colors.blue[900],
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 5.0),
             child: Row(

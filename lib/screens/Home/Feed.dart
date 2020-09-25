@@ -21,6 +21,7 @@ class _FeedState extends State<Feed> {
 
   final AuthService _auth = AuthService();
 
+  String error;
   String feed;
   String status= " ";
   void update(){
@@ -41,25 +42,41 @@ class _FeedState extends State<Feed> {
       sampleImage = File(tempImage.path);
     });
   }
-  void _enableUpload(uid) async{
-    var now = DateTime.now().millisecondsSinceEpoch.toString();
-    print(now);
-    final StorageReference firebaseStorageRef =await  FirebaseStorage.instance.ref().child("/uploads/$uid$now.jpg");
-    final StorageUploadTask task =await firebaseStorageRef.putFile(sampleImage);
+  void _enableUpload(uid, list) async{
+    setState(() {
+      status = "Uploading...";
+    });
+    if(list.length <4){
+      var now = DateTime.now().millisecondsSinceEpoch.toString();
+      print(now);
+      final StorageReference firebaseStorageRef =await  FirebaseStorage.instance.ref().child("/uploads/$uid$now.jpg");
+      final StorageUploadTask task =await firebaseStorageRef.putFile(sampleImage);
 
-    task.onComplete.then((val) async {
-       firebaseStorageRef.getDownloadURL().then((value) async =>{
-        setState((){
-          status = "uploaded !!";
-          feed = value.toString();
-        }),
-       await DatabaseService(uid: uid).updateFeed(feed)
-      }).catchError((e){
-        setState(() {
-          status = "an error occured";
+      task.onComplete.then((val) async {
+        firebaseStorageRef.getDownloadURL().then((value) async =>{
+          setState((){
+            status = "Uploaded";
+            feed = value.toString();
+          }),
+          await DatabaseService(uid: uid).updateFeed(feed)
+        }).catchError((e){
+          setState(() {
+            status = "An error occured";
+          });
         });
       });
-    });
+    }
+    else{
+      setState(() {
+        status = "You reached your max limit on uploads. Delete a few uploads";
+      });
+    }
+
+  }
+
+  void deletePic() async {
+    final StorageReference ref = await FirebaseStorage.instance.getReferenceFromUrl(feed);
+    await ref.delete();
   }
 
 
@@ -67,32 +84,42 @@ class _FeedState extends State<Feed> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User_>(context);
-    return Scaffold(
-      body: sampleImage == null? Center(
-        child: FlatButton(
-          color: Colors.blue,
-          onPressed: (){
-            getImage();
-          },
-          child: Text("select", style: TextStyle(color: Colors.white),),
-        )
-      ): Column(
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(30, 20, 10, 20)
-            ,child: Image.file(sampleImage, height: 300.0, width: 300.0),
+    return StreamBuilder<userData>(
+      stream: DatabaseService(uid: user.id).UserData,
+      builder: (context, snapshot) {
+        userData data = snapshot.data;
+        return Scaffold(
+          body: sampleImage == null? Center(
+            child: FlatButton(
+              color: Colors.blue,
+              onPressed: (){
+                getImage();
+              },
+              child: Text("select", style: TextStyle(color: Colors.white),),
+            )
+          ): Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(10, 20, 10, 20)
+                ,child: Image.file(sampleImage, height: 300.0, width: 300.0),
+              ),
+              FlatButton(
+                color: Colors.blue,
+                child: Text("upload", style: TextStyle(color: Colors.white)),
+                onPressed: (){
+                  _enableUpload(user.id, data.feeds);
+                },
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+                child: Text("$status"),
+              )
+            ],
           ),
-          FlatButton(
-            color: Colors.blue,
-            child: Text("upload", style: TextStyle(color: Colors.white)),
-            onPressed: (){
-              _enableUpload(user.id);
-            },
-          ),
-          Text("$status")
-        ],
-      ),
 
+        );
+      }
     );
   }
 }
