@@ -18,7 +18,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   File newProfilePic;
   String url;
-  String uploaded = "";
+  String uploaded;
 
   Future getImage() async {
     var tempImage = await ImagePicker().getImage(source: ImageSource.gallery);
@@ -28,28 +28,28 @@ class _ProfileState extends State<Profile> {
   }
 
   uploadImage(uid) async {
+    setState(() {
+      uploaded= "uploading...";
+    });
     var time = DateTime.now().millisecondsSinceEpoch;
-
-
-   final StorageReference storeRef =await FirebaseStorage.instance.ref().child("profilepics/$uid.jpg");
+   final StorageReference storeRef =await FirebaseStorage.instance.ref().child("profilepics/$uid/mypic.jpg");
   StorageUploadTask task = storeRef.putFile(newProfilePic);
 
     task.onComplete.then((value) async => {
     await storeRef.getDownloadURL().then((value) =>{
-    print(value),
     setState((){
-    uploaded = "true";
+    uploaded = "uploaded";
     url = value.toString();
     })
     }).catchError((e){
     setState(() {
-    uploaded = "false";
+    uploaded = "upload failed";
     });
     })
     })
     .catchError((e)=>{
     setState(() {
-    uploaded = "false";
+    uploaded = "upload failed";
     })
     });
 
@@ -102,8 +102,7 @@ class _ProfileState extends State<Profile> {
                   },
                   child: newProfilePic == null? Text("chooseImage"): Text("uploadImage"),
                 ),
-                uploaded == "true"? Text("uploaded!"): Container(),
-                uploaded == "false"? Text("upload failed!"): Container(),
+                uploaded != null? Text("$uploaded"): Container(),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 6.0),
                   child: Form(
@@ -149,6 +148,7 @@ class _ProfileState extends State<Profile> {
                               color: Colors.redAccent,
                               onPressed: () async {
                                 if(_key.currentState.validate()){
+                                  print(url);
                                   await DatabaseService(uid: user.id).updateData(
                                       _currentName?? data.name
                                       , _currentEmail?? data.email

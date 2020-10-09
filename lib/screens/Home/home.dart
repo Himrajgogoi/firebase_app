@@ -44,6 +44,17 @@ class _HomeState extends State<Home> {
      });
    }
 
+   /*final FirebaseMessaging _messaging = FirebaseMessaging();
+
+   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _messaging.getToken().then((token){
+      print(token);
+    });
+  }*/
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User_>(context);

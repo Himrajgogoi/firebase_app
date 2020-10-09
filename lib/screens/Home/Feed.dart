@@ -49,7 +49,7 @@ class _FeedState extends State<Feed> {
     if(list.length <4){
       var now = DateTime.now().millisecondsSinceEpoch.toString();
       print(now);
-      final StorageReference firebaseStorageRef =await  FirebaseStorage.instance.ref().child("/uploads/$uid$now.jpg");
+      final StorageReference firebaseStorageRef =await  FirebaseStorage.instance.ref().child("uploads/$uid/$uid$now.jpg");
       final StorageUploadTask task =await firebaseStorageRef.putFile(sampleImage);
 
       task.onComplete.then((val) async {
